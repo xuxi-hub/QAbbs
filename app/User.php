@@ -4,6 +4,8 @@ namespace App;
 
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Naux\Mail\SendCloudTemplate;
+use Mail;
 
 class User extends Authenticatable
 {
@@ -26,4 +28,19 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+    public function sendPasswordResetNotification($token)
+    {
+        // 模板变量
+        $data = [
+            'url' => url('password/reset', $token)
+        ];
+        $template = new SendCloudTemplate('QAbbs_reset_password', $data);
+
+        Mail::raw($template, function ($message) {
+            $message->from('QAbbs@maillist.sendcloud.org', 'QAbbs');
+
+            $message->to($this->email);
+        });
+    }
 }
